@@ -1,0 +1,23 @@
+{% extends 'shop/base.html' %}
+{% block title %}Order Confirmed — LogiCart{% endblock %}
+{% block newsletter %}{% endblock %}
+{% block content %}
+<div class="lc-confirmed">
+  <div class="lc-confirmed-icon"><i class="fas fa-check" style="color:var(--green);font-size:2rem"></i></div>
+  <h1 style="font-size:2rem;font-weight:800;letter-spacing:-1px;margin-bottom:12px">Order Confirmed! 🎉</h1>
+  <p style="color:var(--muted);margin-bottom:24px">Thank you <strong>{{ order.name }}</strong>, your order <strong>#{{ order.order_id }}</strong> has been placed successfully.</p>
+  <div style="background:var(--white);border:1px solid var(--border);border-radius:14px;padding:24px;text-align:left;margin-bottom:24px">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:.88rem">
+      <div><span style="color:var(--muted)">Order ID</span><br><strong>#{{ order.order_id }}</strong></div>
+      <div><span style="color:var(--muted)">Amount Paid</span><br><strong>₹{{ order.amount }}</strong></div>
+      <div><span style="color:var(--muted)">Email</span><br><strong>{{ order.email }}</strong></div>
+      <div><span style="color:var(--muted)">Deliver To</span><br><strong>{{ order.city }}, {{ order.state }}</strong></div>
+    </div>
+  </div>
+  <p style="font-size:.85rem;color:var(--muted);margin-bottom:20px">A confirmation email has been sent to {{ order.email }}. You can track your order anytime.</p>
+  <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+    <a href="{% url 'TrackOrder' %}" class="lc-btn lc-btn-outline"><i class="fas fa-search"></i> Track Order</a>
+    <a href="{% url 'ShopHome' %}" class="lc-btn lc-btn-accent"><i class="fas fa-arrow-right"></i> Continue Shopping</a>
+  </div>
+</div>
+{% endblock %}

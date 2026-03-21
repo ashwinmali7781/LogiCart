@@ -1,0 +1,32 @@
+{% extends 'dashboard/base.html' %}
+{% block title %}Messages{% endblock %}
+{% block page_title %}Contact Messages{% endblock %}
+{% block nav_messages %}active{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+  <a href="?filter=unread" class="btn btn-sm {% if filter == 'unread' %}btn-primary{% else %}btn-outline-secondary{% endif %}">Unread</a>
+  <a href="?filter=all" class="btn btn-sm {% if filter == 'all' %}btn-secondary{% else %}btn-outline-secondary{% endif %} ml-2">All</a>
+</div>
+<div class="dash-card">
+  <div class="card-body p-0">
+    <table class="table dash-table mb-0">
+      <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Message</th><th>Date</th><th></th></tr></thead>
+      <tbody>
+        {% for m in msgs %}
+        <tr {% if not m.is_read %}style="background:#fffbf0"{% endif %}>
+          <td><strong>{{ m.name }}</strong> {% if not m.is_read %}<span class="badge badge-warning">New</span>{% endif %}</td>
+          <td>{{ m.email }}</td>
+          <td>{{ m.phone|default:"—" }}</td>
+          <td>{{ m.desc|truncatechars:55 }}</td>
+          <td><small>{{ m.submitted_at|date:"d M Y" }}</small></td>
+          <td><a href="{% url 'dashboard_message_detail' m.pk %}" class="btn btn-sm btn-outline-primary">Read</a></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" class="text-center text-muted py-4">No messages.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

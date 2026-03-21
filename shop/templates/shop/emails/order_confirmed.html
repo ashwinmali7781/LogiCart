@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  body { font-family: 'DM Sans', Arial, sans-serif; background: #f8f9fb; margin: 0; padding: 0; }
+  .wrap { max-width: 580px; margin: 32px auto; background: #fff; border-radius: 16px; overflow: hidden; border: 1px solid #e5e7eb; }
+  .header { background: linear-gradient(135deg, #0d0f14, #1c1f29); padding: 32px; text-align: center; }
+  .brand { font-size: 1.6rem; font-weight: 800; color: #fff; letter-spacing: -1px; }
+  .brand span { color: #FF4D00; }
+  .body { padding: 32px; }
+  .greeting { font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; }
+  .info-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f3f4f6; font-size: .88rem; }
+  .footer { background: #f8f9fb; padding: 20px 32px; text-align: center; font-size: .78rem; color: #9ca3af; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <div class="brand">Logi<span>Cart</span></div>
+    <p style="color:#9ca3af;margin-top:8px;font-size:.88rem">Order Confirmation</p>
+  </div>
+  <div class="body">
+    <p class="greeting">Hi {{ order.name }},</p>
+    <p style="color:#6b7280;font-size:.9rem;margin-bottom:20px">Your order has been confirmed and is being processed. Here's a summary:</p>
+    <div style="background:#f8f9fb;border-radius:12px;padding:16px;margin-bottom:20px">
+      <div class="info-row"><span style="color:#6b7280">Order ID</span><strong>#{{ order.order_id }}</strong></div>
+      <div class="info-row"><span style="color:#6b7280">Amount</span><strong>₹{{ order.amount }}</strong></div>
+      <div class="info-row"><span style="color:#6b7280">Deliver to</span><span>{{ order.address }}, {{ order.city }}, {{ order.state }} — {{ order.zip_code }}</span></div>
+      <div class="info-row" style="border:none"><span style="color:#6b7280">Status</span><span style="background:#dcfce7;color:#16a34a;padding:2px 10px;border-radius:99px;font-weight:600;font-size:.78rem">Order Placed</span></div>
+    </div>
+    <p style="font-size:.85rem;color:#6b7280;margin-bottom:20px">You can track your order at any time using your Order ID and email address.</p>
+    <a href="http://localhost:8000/shop/tracker/" style="display:inline-block;background:#FF4D00;color:#fff;padding:11px 24px;border-radius:10px;font-weight:600;font-size:.9rem;text-decoration:none">Track My Order</a>
+  </div>
+  <div class="footer">© 2025 LogiCart. All rights reserved.</div>
+</div>
+</body>
+</html>

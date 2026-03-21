@@ -1,0 +1,26 @@
+{% extends 'shop/base.html' %}
+{% block title %}Contact Us — LogiCart{% endblock %}
+{% block content %}
+<div class="lc-contact">
+  <div>
+    <h1 style="font-size:2rem;font-weight:800;letter-spacing:-1px;margin-bottom:12px">Get in Touch</h1>
+    <p style="color:var(--muted);line-height:1.7;margin-bottom:28px">Have a question, feedback, or need help with your order? We're here for you — typically respond within 24 hours.</p>
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <div style="display:flex;align-items:center;gap:14px"><div class="lc-feature-icon"><i class="fas fa-envelope"></i></div><div><div style="font-weight:600;font-size:.9rem">Email</div><div style="font-size:.85rem;color:var(--muted)">support@logicart.in</div></div></div>
+      <div style="display:flex;align-items:center;gap:14px"><div class="lc-feature-icon"><i class="fas fa-phone"></i></div><div><div style="font-weight:600;font-size:.9rem">Phone</div><div style="font-size:.85rem;color:var(--muted)">+91 1800-123-4567 (Mon–Sat 9am–6pm)</div></div></div>
+      <div style="display:flex;align-items:center;gap:14px"><div class="lc-feature-icon"><i class="fas fa-map-marker-alt"></i></div><div><div style="font-weight:600;font-size:.9rem">Office</div><div style="font-size:.85rem;color:var(--muted)">Level 5, ICC Trade Tower, Pune — 411016</div></div></div>
+    </div>
+  </div>
+  <div class="lc-contact-card">
+    <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:20px">Send us a Message</h3>
+    <form method="post">
+      {% csrf_token %}
+      <div class="lc-form-group"><label class="lc-form-label">Full Name *</label><input class="lc-form-input" name="name" required placeholder="Rahul Mehta"></div>
+      <div class="lc-form-group"><label class="lc-form-label">Email *</label><input class="lc-form-input" name="email" type="email" required placeholder="you@email.com"></div>
+      <div class="lc-form-group"><label class="lc-form-label">Phone</label><input class="lc-form-input" name="phone" placeholder="+91 98765 43210"></div>
+      <div class="lc-form-group"><label class="lc-form-label">Message *</label><textarea class="lc-form-input" name="desc" required placeholder="How can we help you?" rows="4"></textarea></div>
+      <button type="submit" class="lc-btn lc-btn-accent" style="width:100%;justify-content:center"><i class="fas fa-paper-plane"></i> Send Message</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

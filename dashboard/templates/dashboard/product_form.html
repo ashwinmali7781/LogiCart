@@ -1,0 +1,89 @@
+{% extends 'dashboard/base.html' %}
+{% block title %}{{ action }} Product{% endblock %}
+{% block page_title %}{{ action }} Product{% endblock %}
+{% block nav_products %}active{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="form-section mb-4">
+        <h6 class="font-weight-bold mb-3">Basic Info</h6>
+        <div class="form-group">
+          <label>Product Name *</label>
+          <input type="text" name="product_name" class="form-control" value="{{ product.product_name }}" required>
+        </div>
+        <div class="form-row">
+          <div class="form-group col-md-6">
+            <label>Category *</label>
+            <input type="text" name="category" class="form-control" value="{{ product.category }}" required placeholder="e.g. Electronics">
+          </div>
+          <div class="form-group col-md-6">
+            <label>Subcategory</label>
+            <input type="text" name="subcategory" class="form-control" value="{{ product.subcategory }}" placeholder="e.g. Mobiles">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea name="desc" class="form-control" rows="4">{{ product.desc }}</textarea>
+        </div>
+      </div>
+
+      <div class="form-section mb-4">
+        <h6 class="font-weight-bold mb-3">Pricing & Inventory</h6>
+        <div class="form-row">
+          <div class="form-group col-md-4">
+            <label>Selling Price (Rs.) *</label>
+            <input type="number" name="price" class="form-control" value="{{ product.price|default:0 }}" min="0" required>
+          </div>
+          <div class="form-group col-md-4">
+            <label>Original Price (Rs.)</label>
+            <input type="number" name="original_price" class="form-control" value="{{ product.original_price|default:0 }}" min="0">
+            <small class="text-muted">Shown as strike-through if higher than price</small>
+          </div>
+          <div class="form-group col-md-4">
+            <label>Stock Quantity *</label>
+            <input type="number" name="stock" class="form-control" value="{{ product.stock|default:0 }}" min="0" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Listed Date *</label>
+          <input type="date" name="pub_date" class="form-control"
+                 value="{{ product.pub_date|date:'Y-m-d'|default:today }}" required>
+        </div>
+      </div>
+
+      <div class="form-section mb-4">
+        <h6 class="font-weight-bold mb-3">Image</h6>
+        {% if product.image %}
+        <div class="mb-3">
+          <img src="/media/{{ product.image }}" style="max-height:160px;border-radius:8px;object-fit:contain;background:#f8f9fa;padding:8px;">
+          <div class="text-muted small mt-1">Current image. Upload a new one to replace it.</div>
+        </div>
+        {% endif %}
+        <input type="file" name="image" class="form-control-file" accept="image/*">
+      </div>
+
+      <div class="form-section mb-4">
+        <h6 class="font-weight-bold mb-3">Visibility</h6>
+        <div class="form-check mb-2">
+          <input type="checkbox" name="is_featured" class="form-check-input" id="featured"
+                 {% if product.is_featured %}checked{% endif %}>
+          <label class="form-check-label" for="featured">⭐ Mark as Featured (shown in hero section)</label>
+        </div>
+        <div class="form-check">
+          <input type="checkbox" name="is_active" class="form-check-input" id="active"
+                 {% if product.is_active or action == 'Add' %}checked{% endif %}>
+          <label class="form-check-label" for="active">✅ Active (visible in shop)</label>
+        </div>
+      </div>
+
+      <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary px-4">{{ action }} Product</button>
+        <a href="{% url 'dashboard_products' %}" class="btn btn-outline-secondary ml-2">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

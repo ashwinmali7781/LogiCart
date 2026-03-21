@@ -1,0 +1,71 @@
+{% extends 'shop/base.html' %}
+{% block title %}Track Order — LogiCart{% endblock %}
+{% block content %}
+<div class="lc-tracker">
+  <h1 style="font-size:1.8rem;font-weight:800;letter-spacing:-1px;margin-bottom:6px">Track Your Order</h1>
+  <p style="color:var(--muted);margin-bottom:28px">Enter your order ID and email to get live updates.</p>
+
+  <div class="lc-tracker-card">
+    <form id="trackerForm">
+      {% csrf_token %}
+      <div class="lc-form-group">
+        <label class="lc-form-label">Order ID</label>
+        <input class="lc-form-input" id="trackOrderId" placeholder="e.g. 1042" required>
+      </div>
+      <div class="lc-form-group">
+        <label class="lc-form-label">Email Address</label>
+        <input class="lc-form-input" id="trackEmail" type="email" placeholder="you@email.com" required>
+      </div>
+      <button type="submit" class="lc-btn lc-btn-accent"><i class="fas fa-search"></i> Track Order</button>
+    </form>
+
+    <div id="trackResult" style="display:none;margin-top:24px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border)">
+        <div style="width:36px;height:36px;border-radius:50%;background:var(--green-light);display:flex;align-items:center;justify-content:center">
+          <i class="fas fa-check" style="color:var(--green)"></i>
+        </div>
+        <div>
+          <div style="font-weight:700">Order Found</div>
+          <div id="trackStatus" style="font-size:.85rem;color:var(--muted)"></div>
+        </div>
+      </div>
+      <div class="lc-timeline" id="trackTimeline"></div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('trackerForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  const orderId = document.getElementById('trackOrderId').value;
+  const email = document.getElementById('trackEmail').value;
+  const fd = new FormData();
+  fd.append('orderId', orderId);
+  fd.append('email', email);
+  fd.append('csrfmiddlewaretoken', lcGetCookie('csrftoken'));
+  fetch('{% url "TrackOrder" %}', { method: 'POST', body: fd })
+    .then(r => r.json())
+    .then(data => {
+      if (data.status === 'success') {
+        document.getElementById('trackResult').style.display = 'block';
+        document.getElementById('trackStatus').textContent = 'Status: ' + data.order_status;
+        const tl = document.getElementById('trackTimeline');
+        tl.innerHTML = data.updates.map(u => `
+          <div class="lc-timeline-item">
+            <div class="lc-timeline-dot"><i class="fas fa-check"></i></div>
+            <div class="lc-timeline-text">
+              <h4>${u.text}</h4>
+              <p>${new Date(u.time).toLocaleString('en-IN')}</p>
+            </div>
+          </div>`).join('');
+      } else if (data.status === 'noitem') {
+        lcToast('No order found with that ID and email.', 'error');
+      } else {
+        lcToast('Something went wrong. Please try again.', 'error');
+      }
+    });
+});
+</script>
+{% endblock %}

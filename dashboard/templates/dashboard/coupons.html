@@ -1,0 +1,39 @@
+{% extends 'dashboard/base.html' %}
+{% block title %}Coupons{% endblock %}
+{% block page_title %}Coupons{% endblock %}
+{% block nav_coupons %}active{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-end mb-4">
+  <a href="{% url 'dashboard_coupon_add' %}" class="btn btn-success"><i class="fas fa-plus mr-1"></i>New Coupon</a>
+</div>
+<div class="dash-card">
+  <div class="card-body p-0">
+    <table class="table dash-table mb-0">
+      <thead><tr><th>Code</th><th>Type</th><th>Discount</th><th>Min Order</th><th>Used/Max</th><th>Valid Until</th><th>Active</th><th></th></tr></thead>
+      <tbody>
+        {% for c in coupons %}
+        <tr>
+          <td><code class="text-primary">{{ c.code }}</code></td>
+          <td>{{ c.get_discount_type_display }}</td>
+          <td>{% if c.discount_type == 'percent' %}{{ c.discount_value }}%{% else %}Rs. {{ c.discount_value }}{% endif %}</td>
+          <td>Rs. {{ c.min_order_amount }}</td>
+          <td>{{ c.used_count }} / {{ c.max_uses }}</td>
+          <td>{{ c.valid_to }}</td>
+          <td>{% if c.is_active %}<span class="badge badge-success">Active</span>{% else %}<span class="badge badge-secondary">Off</span>{% endif %}</td>
+          <td>
+            <form method="post" action="{% url 'dashboard_coupon_delete' c.pk %}" class="d-inline"
+                  onsubmit="return confirm('Delete coupon {{ c.code }}?')">
+              {% csrf_token %}
+              <button class="btn btn-sm btn-outline-danger">Delete</button>
+            </form>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="8" class="text-center text-muted py-4">No coupons yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

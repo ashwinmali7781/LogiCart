@@ -1,0 +1,155 @@
+{% extends 'shop/base.html' %}
+{% load static %}
+{% block title %}{% if query %}Search: {{ query }}{% else %}Browse Products{% endif %} — LogiCart{% endblock %}
+
+{% block content %}
+<div style="padding:24px 32px 0">
+  <div style="display:flex;align-items:center;gap:8px;font-size:.85rem;color:var(--muted)">
+    <a href="{% url 'ShopHome' %}" style="color:var(--accent)">Home</a>
+    <span>/</span>
+    <span>{% if query %}Search: "{{ query }}"{% else %}All Products{% endif %}</span>
+  </div>
+</div>
+
+<div class="lc-search-layout">
+  <!-- Filters Sidebar -->
+  <div class="lc-filter-sidebar">
+    <div class="lc-filter-title">Filters</div>
+    <form method="get" action="{% url 'Search' %}">
+      {% if query %}<input type="hidden" name="search" value="{{ query }}">{% endif %}
+
+      <div class="lc-filter-group">
+        <label>Category</label>
+        <select name="cat" class="lc-select" onchange="this.form.submit()">
+          <option value="">All Categories</option>
+          {% for cat in all_categories %}
+          <option value="{{ cat }}" {% if cat_filter == cat %}selected{% endif %}>{{ cat }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="lc-filter-group">
+        <label>Price Range (₹)</label>
+        <div class="lc-range-row">
+          <input class="lc-range-input" type="number" name="min_price" placeholder="Min" value="{{ min_price }}">
+          <input class="lc-range-input" type="number" name="max_price" placeholder="Max" value="{{ max_price }}">
+        </div>
+      </div>
+
+      <div class="lc-filter-group">
+        <label>Min Rating</label>
+        <div class="lc-radio-list">
+          {% for r in "4321" %}
+          <label>
+            <input type="radio" name="min_rating" value="{{ r }}" {% if min_rating == r %}checked{% endif %}>
+            {{ r }}★ & above
+          </label>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="lc-filter-group">
+        <label>Sort By</label>
+        <select name="sort" class="lc-select">
+          <option value="">Newest</option>
+          <option value="price_asc" {% if sort_by == 'price_asc' %}selected{% endif %}>Price: Low to High</option>
+          <option value="price_desc" {% if sort_by == 'price_desc' %}selected{% endif %}>Price: High to Low</option>
+          <option value="name" {% if sort_by == 'name' %}selected{% endif %}>Name A–Z</option>
+        </select>
+      </div>
+
+      <button type="submit" class="lc-btn lc-btn-accent" style="width:100%;justify-content:center">Apply Filters</button>
+      <a href="{% url 'Search' %}" style="display:block;text-align:center;margin-top:10px;font-size:.82rem;color:var(--muted)">Clear All</a>
+    </form>
+  </div>
+
+  <!-- Products -->
+  <div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <h2 style="font-size:1.4rem;font-weight:700;letter-spacing:-.5px">
+        {% if query %}Results for "{{ query }}"{% elif cat_filter %}{{ cat_filter }}{% else %}All Products{% endif %}
+        <span style="font-size:.85rem;color:var(--muted);font-weight:400;margin-left:8px">{{ page_obj.paginator.count }} items</span>
+      </h2>
+    </div>
+
+    {% if products.object_list %}
+    <div class="lc-products-grid">
+      {% for product in products %}
+      <div class="lc-product-card">
+        <div class="lc-product-img">
+          {% if product.image %}
+            <img src="{{ product.image.url }}" alt="{{ product.product_name }}">
+          {% else %}
+            <span style="font-size:4rem">🛍️</span>
+          {% endif %}
+          {% if not product.in_stock %}
+            <span class="lc-product-badge" style="background:#6b7280">OUT OF STOCK</span>
+          {% elif product.discount_percent %}
+            <span class="lc-product-badge">{{ product.discount_percent }}% OFF</span>
+          {% endif %}
+          <button class="lc-wish-btn" onclick="lcToggleWish(this, {{ product.id }}, '{{ product.product_name|escapejs }}')" title="Wishlist">
+            <i class="far fa-heart"></i>
+          </button>
+        </div>
+        <div class="lc-product-body">
+          <div class="lc-product-cat">{{ product.category }}{% if product.subcategory %} · {{ product.subcategory }}{% endif %}</div>
+          <div class="lc-product-name">{{ product.product_name }}</div>
+          <div class="lc-product-stars">
+            <span class="stars">
+              {% with rating=product.avg_rating %}
+                {% for i in "12345" %}{% if forloop.counter <= rating %}★{% else %}☆{% endif %}{% endfor %}
+              {% endwith %}
+            </span>
+            <span class="count">{{ product.avg_rating }} ({{ product.reviews.count }})</span>
+          </div>
+          <div class="lc-product-price">
+            <span class="price-now">₹{{ product.price|floatformat:0 }}</span>
+            {% if product.original_price and product.original_price > product.price %}
+              <span class="price-was">₹{{ product.original_price|floatformat:0 }}</span>
+              <span class="price-off">{{ product.discount_percent }}% off</span>
+            {% endif %}
+          </div>
+        </div>
+        <div class="lc-product-footer">
+          {% if product.in_stock %}
+            <button class="btn-sm btn-add-cart" onclick="LC.addItem({{ product.id }}, '{{ product.product_name|escapejs }}', {{ product.price }}, '🛍️')">
+              <i class="fas fa-cart-plus"></i> Add to Cart
+            </button>
+          {% else %}
+            <button class="btn-sm btn-add-cart" disabled style="opacity:.5;cursor:not-allowed">Out of Stock</button>
+          {% endif %}
+          <a href="{% url 'ProductView' product.id %}" class="btn-sm btn-quick-view">View</a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <div class="lc-pagination">
+      {% if page_obj.has_previous %}
+        <a href="?{% if query %}search={{ query }}&{% endif %}{% if cat_filter %}cat={{ cat_filter }}&{% endif %}page={{ page_obj.previous_page_number }}" class="lc-page-btn">‹ Prev</a>
+      {% endif %}
+      {% for num in page_obj.paginator.page_range %}
+        {% if page_obj.number == num %}
+          <span class="lc-page-btn active">{{ num }}</span>
+        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+          <a href="?{% if query %}search={{ query }}&{% endif %}{% if cat_filter %}cat={{ cat_filter }}&{% endif %}page={{ num }}" class="lc-page-btn">{{ num }}</a>
+        {% endif %}
+      {% endfor %}
+      {% if page_obj.has_next %}
+        <a href="?{% if query %}search={{ query }}&{% endif %}{% if cat_filter %}cat={{ cat_filter }}&{% endif %}page={{ page_obj.next_page_number }}" class="lc-page-btn">Next ›</a>
+      {% endif %}
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div style="text-align:center;padding:80px 24px;color:var(--muted)">
+      <i class="fas fa-search" style="font-size:3rem;opacity:.3;display:block;margin-bottom:16px"></i>
+      <h3 style="margin-bottom:8px">No products found</h3>
+      <p>Try different keywords or <a href="{% url 'Search' %}" style="color:var(--accent)">browse all products</a>.</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,75 @@
+{% extends 'dashboard/base.html' %}
+{% block title %}Return Requests – Dashboard{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h4 class="mb-0 font-weight-bold">Return Requests</h4>
+  <form method="get" class="form-inline">
+    <select name="status" class="form-control form-control-sm mr-2" onchange="this.form.submit()">
+      <option value="">All Statuses</option>
+      {% for val, label in status_choices %}
+      <option value="{{ val }}" {% if val == sel_status %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </form>
+</div>
+
+{% if not returns %}
+<div class="alert alert-info">No return requests found.</div>
+{% else %}
+<div class="table-responsive">
+  <table class="table table-bordered table-hover bg-white shadow-sm" style="border-radius:10px;overflow:hidden">
+    <thead class="thead-light">
+      <tr>
+        <th>#</th><th>Order</th><th>Customer</th><th>Reason</th><th>Status</th><th>Submitted</th><th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for ret in returns %}
+      <tr>
+        <td>{{ ret.pk }}</td>
+        <td><a href="/dashboard/orders/{{ ret.order.order_id }}/">#{{ ret.order.order_id }}</a></td>
+        <td>{{ ret.order.name }}<br><small class="text-muted">{{ ret.order.email }}</small></td>
+        <td>{{ ret.get_reason_display }}</td>
+        <td>
+          {% if ret.status == 'pending' %}<span class="badge badge-warning">{{ ret.get_status_display }}</span>
+          {% elif ret.status == 'approved' %}<span class="badge badge-success">{{ ret.get_status_display }}</span>
+          {% elif ret.status == 'rejected' %}<span class="badge badge-danger">{{ ret.get_status_display }}</span>
+          {% else %}<span class="badge badge-info">{{ ret.get_status_display }}</span>{% endif %}
+        </td>
+        <td>{{ ret.created_at|date:"d M Y" }}</td>
+        <td>
+          <button class="btn btn-sm btn-outline-primary" data-toggle="modal" data-target="#retModal{{ ret.pk }}">Review</button>
+          <!-- Modal -->
+          <div class="modal fade" id="retModal{{ ret.pk }}" tabindex="-1">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title">Return Request #{{ ret.pk }}</h5><button type="button" class="close" data-dismiss="modal">&times;</button></div>
+                <div class="modal-body">
+                  <p><strong>Order:</strong> #{{ ret.order.order_id }} — {{ ret.order.name }}</p>
+                  <p><strong>Reason:</strong> {{ ret.get_reason_display }}</p>
+                  <p><strong>Description:</strong><br>{{ ret.description }}</p>
+                  <hr>
+                  <form method="post" action="/dashboard/returns/{{ ret.pk }}/action/">
+                    {% csrf_token %}
+                    <div class="form-group">
+                      <label class="small font-weight-bold">Admin Note (optional)</label>
+                      <textarea name="admin_note" class="form-control form-control-sm" rows="2">{{ ret.admin_note }}</textarea>
+                    </div>
+                    <div class="d-flex" style="gap:8px">
+                      <button name="action" value="approve" class="btn btn-success btn-sm flex-grow-1">Approve</button>
+                      <button name="action" value="reject" class="btn btn-danger btn-sm flex-grow-1">Reject</button>
+                      <button name="action" value="complete" class="btn btn-info btn-sm flex-grow-1">Complete</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Dashboard{% endblock %} — LogiCart Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    :root{--sw:240px;--sbg:#0d0f14;--shov:#1c1f29;--acc:#FF4D00;--acc2:#ff7a40;--accl:#fff0eb;--grn:#16a34a;--grnl:#dcfce7;--blu:#2563eb;--blul:#dbeafe;--yel:#d97706;--yell:#fef3c7;--red:#dc2626;--redl:#fee2e2;--bdr:#e5e7eb;--bg:#f8f9fb;--ink:#0d0f14;--mut:#6b7280}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink)}
+    a{text-decoration:none;color:inherit}
+    h1,h2,h3,h4,h5{font-family:'Syne',sans-serif}
+    .ad-sidebar{width:var(--sw);background:var(--sbg);min-height:100vh;position:fixed;top:0;left:0;z-index:100;display:flex;flex-direction:column;overflow-y:auto}
+    .ad-brand{padding:20px 18px 16px;color:#fff;font-family:'Syne',sans-serif;font-weight:800;font-size:1.15rem;letter-spacing:-1px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:8px}
+    .ad-brand span{color:var(--acc)}
+    .live-dot{width:7px;height:7px;background:var(--grn);border-radius:50%;margin-left:auto}
+    .ad-nav{padding:10px 0;flex:1}
+    .ad-section{padding:10px 16px 4px;font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:#374151}
+    .ad-nav a{display:flex;align-items:center;gap:10px;padding:9px 16px;font-size:.84rem;font-weight:500;color:#9ca3af;transition:.15s;border-left:3px solid transparent}
+    .ad-nav a:hover,.ad-nav a.active{background:var(--shov);color:#fff;border-left-color:var(--acc)}
+    .ad-nav a i{width:16px;text-align:center;font-size:.82rem;flex-shrink:0}
+    .ad-nbadge{margin-left:auto;background:var(--red);color:#fff;border-radius:99px;font-size:.62rem;font-weight:700;padding:1px 6px;min-width:18px;text-align:center}
+    .ad-sfooter{padding:14px 16px;border-top:1px solid rgba(255,255,255,.06)}
+    .ad-sfooter a{color:#6b7280;font-size:.82rem;display:flex;align-items:center;gap:8px;transition:.2s}
+    .ad-sfooter a:hover{color:#fff}
+    .ad-main{margin-left:var(--sw);min-height:100vh}
+    .ad-topbar{background:#fff;padding:14px 26px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+    .ad-ptitle{font-family:'Syne',sans-serif;font-weight:700;font-size:1rem}
+    .ad-tright{display:flex;align-items:center;gap:12px;font-size:.84rem;color:var(--mut)}
+    .ad-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--acc),var(--acc2));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:.8rem}
+    .ad-body{padding:24px 26px}
+    .ad-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px}
+    .ad-stat{background:#fff;border-radius:12px;padding:18px;border:1px solid var(--bdr);display:flex;align-items:center;gap:14px}
+    .ad-stat-icon{width:46px;height:46px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0}
+    .ad-stat-label{font-size:.68rem;text-transform:uppercase;letter-spacing:.5px;color:var(--mut);font-weight:700;margin-bottom:2px}
+    .ad-stat-val{font-size:1.5rem;font-weight:700;letter-spacing:-.5px}
+    .ad-stat-change{font-size:.7rem;font-weight:600;margin-top:2px}
+    .chup{color:var(--grn)}.chdn{color:var(--red)}
+    .ad-card{background:#fff;border-radius:12px;border:1px solid var(--bdr);overflow:hidden;margin-bottom:18px}
+    .ad-card-head{padding:14px 18px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between}
+    .ad-card-title{font-family:'Syne',sans-serif;font-weight:700;font-size:.9rem}
+    .ad-card-body{padding:18px}
+    .ad-table{width:100%;border-collapse:collapse}
+    .ad-table th{padding:10px 16px;font-size:.67rem;text-transform:uppercase;letter-spacing:.6px;color:var(--mut);font-weight:700;border-bottom:1px solid var(--bdr);text-align:left;background:var(--bg)}
+    .ad-table td{padding:12px 16px;font-size:.83rem;border-bottom:1px solid #f3f4f6;vertical-align:middle}
+    .ad-table tbody tr:hover{background:#fafafa}
+    .ad-table tbody tr:last-child td{border-bottom:none}
+    .ad-pill{padding:3px 9px;border-radius:99px;font-size:.68rem;font-weight:700;letter-spacing:.3px;white-space:nowrap}
+    .pill-placed{background:#e0e7ff;color:#4338ca}.pill-processing{background:var(--yell);color:var(--yel)}.pill-shipped{background:var(--blul);color:var(--blu)}.pill-delivered{background:var(--grnl);color:var(--grn)}.pill-cancelled{background:var(--redl);color:var(--red)}.pill-refunded{background:#f3f4f6;color:var(--mut)}.pill-active{background:var(--grnl);color:var(--grn)}.pill-inactive{background:#f3f4f6;color:var(--mut)}.pill-pending{background:var(--yell);color:var(--yel)}.pill-approved{background:var(--grnl);color:var(--grn)}.pill-rejected{background:var(--redl);color:var(--red)}
+    .ad-btn{padding:6px 12px;border-radius:8px;font-size:.77rem;font-weight:600;cursor:pointer;border:1.5px solid var(--bdr);background:transparent;font-family:'DM Sans',sans-serif;transition:.2s;display:inline-flex;align-items:center;gap:5px}
+    .ad-btn:hover{background:var(--bg)}
+    .ad-btn-primary{background:var(--acc);color:#fff;border-color:var(--acc)}.ad-btn-primary:hover{background:var(--acc2);border-color:var(--acc2)}
+    .ad-btn-success{background:var(--grn);color:#fff;border-color:var(--grn)}
+    .ad-btn-danger:hover{border-color:var(--red);color:var(--red)}
+    .ad-fg{margin-bottom:14px}.ad-fl{font-size:.77rem;font-weight:700;margin-bottom:5px;display:block;color:#374151}
+    .ad-fi{width:100%;padding:9px 13px;border:1.5px solid var(--bdr);border-radius:9px;font-size:.85rem;font-family:'DM Sans',sans-serif;outline:none;transition:.2s}
+    .ad-fi:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(255,77,0,.08)}
+    .ad-sel{width:100%;padding:9px 13px;border:1.5px solid var(--bdr);border-radius:9px;font-size:.85rem;font-family:'DM Sans',sans-serif;outline:none;background:#fff}
+    .ad-sel:focus{border-color:var(--acc)}
+    .ad-tgl{position:relative;width:44px;height:24px;display:inline-block}
+    .ad-tgl input{display:none}
+    .ad-tgl-sl{position:absolute;inset:0;border-radius:99px;background:var(--bdr);cursor:pointer;transition:.2s}
+    .ad-tgl-sl::before{content:'';position:absolute;width:18px;height:18px;top:3px;left:3px;border-radius:50%;background:#fff;transition:.2s}
+    .ad-tgl input:checked+.ad-tgl-sl{background:var(--acc)}
+    .ad-tgl input:checked+.ad-tgl-sl::before{transform:translateX(20px)}
+    .ad-alert{padding:11px 16px;border-radius:9px;font-size:.86rem;margin-bottom:12px;display:flex;align-items:center;gap:10px}
+    .ad-alert-success{background:var(--grnl);color:var(--grn)}.ad-alert-error{background:var(--redl);color:var(--red)}.ad-alert-warning{background:var(--yell);color:var(--yel)}.ad-alert-info{background:var(--blul);color:var(--blu)}
+    .ad-thumb{width:38px;height:38px;border-radius:8px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;border:1px solid var(--bdr)}
+    .ad-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    @media(max-width:1024px){.ad-stats{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:768px){.ad-main{margin-left:0}.ad-stats{grid-template-columns:1fr 1fr}}
+  </style>
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+<div class="ad-sidebar">
+  <div class="ad-brand">Logi<span>Cart</span> <small style="font-size:.5rem;color:#374151;font-weight:400">ADMIN</small><span class="live-dot"></span></div>
+  <nav class="ad-nav">
+    <div class="ad-section">Overview</div>
+    <a href="{% url 'dashboard_home' %}" class="{% block nav_home %}{% endblock %}"><i class="fas fa-chart-pie"></i> Dashboard</a>
+    <div class="ad-section">Catalogue</div>
+    <a href="{% url 'dashboard_products' %}" class="{% block nav_products %}{% endblock %}"><i class="fas fa-box"></i> Products</a>
+    <a href="{% url 'dashboard_product_add' %}" class="{% block nav_add_product %}{% endblock %}"><i class="fas fa-plus-square"></i> Add Product</a>
+    <a href="{% url 'dashboard_reviews' %}" class="{% block nav_reviews %}{% endblock %}"><i class="fas fa-star"></i> Reviews{% if pending_reviews %}<span class="ad-nbadge">{{ pending_reviews }}</span>{% endif %}</a>
+    <div class="ad-section">Sales</div>
+    <a href="{% url 'dashboard_orders' %}" class="{% block nav_orders %}{% endblock %}"><i class="fas fa-shopping-bag"></i> Orders</a>
+    <a href="{% url 'dashboard_coupons' %}" class="{% block nav_coupons %}{% endblock %}"><i class="fas fa-tag"></i> Coupons</a>
+    <div class="ad-section">Customers</div>
+    <a href="{% url 'dashboard_messages' %}" class="{% block nav_messages %}{% endblock %}"><i class="fas fa-envelope"></i> Messages{% if unread_messages %}<span class="ad-nbadge">{{ unread_messages }}</span>{% endif %}</a>
+    <a href="{% url 'dashboard_newsletter' %}" class="{% block nav_newsletter %}{% endblock %}"><i class="fas fa-paper-plane"></i> Newsletter</a>
+    <a href="{% url 'dashboard_returns' %}" class="{% block nav_returns %}{% endblock %}"><i class="fas fa-undo"></i> Returns{% if pending_returns %}<span class="ad-nbadge">{{ pending_returns }}</span>{% endif %}</a>
+    <div class="ad-section">Site</div>
+    <a href="/shop/" target="_blank"><i class="fas fa-store"></i> View Shop</a>
+    <a href="/admin/"><i class="fas fa-cog"></i> Django Admin</a>
+  </nav>
+  <div class="ad-sfooter"><a href="/admin/logout/"><i class="fas fa-sign-out-alt"></i> Logout</a></div>
+</div>
+
+<div class="ad-main">
+  <div class="ad-topbar">
+    <div class="ad-ptitle">{% block page_title %}Dashboard{% endblock %}</div>
+    <div class="ad-tright">
+      <span style="font-size:.76rem"><i class="fas fa-calendar" style="margin-right:4px"></i>{% now "d M Y" %}</span>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="ad-avatar">{{ request.user.username|first|upper }}</div>
+        <span>{{ request.user.get_full_name|default:request.user.username }}</span>
+      </div>
+    </div>
+  </div>
+  <div class="ad-body">
+    {% if messages %}{% for message in messages %}
+    <div class="ad-alert ad-alert-{{ message.tags|default:'info' }}">
+      <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}exclamation-circle{% else %}info-circle{% endif %}"></i>{{ message }}
+    </div>
+    {% endfor %}{% endif %}
+    {% block content %}{% endblock %}
+  </div>
+</div>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,64 @@
+{% extends 'dashboard/base.html' %}
+{% block title %}Products{% endblock %}
+{% block page_title %}Products{% endblock %}
+{% block nav_products %}active{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <form class="form-inline" method="get">
+    <input class="form-control mr-2" name="q" value="{{ q }}" placeholder="Search products…" style="width:220px">
+    <select class="form-control mr-2" name="cat">
+      <option value="">All Categories</option>
+      {% for c in categories %}<option {% if c == sel_cat %}selected{% endif %} value="{{ c }}">{{ c }}</option>{% endfor %}
+    </select>
+    <button class="btn btn-primary" type="submit">Filter</button>
+    {% if q or sel_cat %}<a href="{% url 'dashboard_products' %}" class="btn btn-outline-secondary ml-2">Clear</a>{% endif %}
+  </form>
+  <a href="{% url 'dashboard_product_add' %}" class="btn btn-success"><i class="fas fa-plus mr-1"></i>Add Product</a>
+</div>
+
+<div class="dash-card">
+  <div class="card-body p-0">
+    <table class="table dash-table mb-0">
+      <thead>
+        <tr>
+          <th>ID</th><th>Image</th><th>Name</th><th>Category</th>
+          <th>Price</th><th>Stock</th><th>Featured</th><th>Active</th><th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in products %}
+        <tr>
+          <td>#{{ p.id }}</td>
+          <td>
+            {% if p.image %}
+            <img src="/media/{{ p.image }}" style="width:46px;height:46px;object-fit:cover;border-radius:6px;">
+            {% else %}<span class="text-muted">—</span>{% endif %}
+          </td>
+          <td><strong>{{ p.product_name|truncatechars:30 }}</strong></td>
+          <td><span class="badge badge-light">{{ p.category }}</span></td>
+          <td>Rs. {{ p.price }}{% if p.original_price and p.original_price > p.price %}<br><small class="text-muted text-decoration-line-through">Rs. {{ p.original_price }}</small>{% endif %}</td>
+          <td>
+            {% if p.stock == 0 %}<span class="badge badge-danger">Out</span>
+            {% elif p.stock <= 5 %}<span class="badge badge-warning">{{ p.stock }}</span>
+            {% else %}<span class="badge badge-success">{{ p.stock }}</span>{% endif %}
+          </td>
+          <td>{% if p.is_featured %}⭐{% else %}—{% endif %}</td>
+          <td>{% if p.is_active %}<span class="badge badge-success">Active</span>{% else %}<span class="badge badge-secondary">Hidden</span>{% endif %}</td>
+          <td>
+            <a href="{% url 'dashboard_product_edit' p.pk %}" class="btn btn-sm btn-outline-primary">Edit</a>
+            <form method="post" action="{% url 'dashboard_product_delete' p.pk %}" class="d-inline"
+                  onsubmit="return confirm('Deactivate {{ p.product_name }}?')">
+              {% csrf_token %}
+              <button class="btn btn-sm btn-outline-danger">Hide</button>
+            </form>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="9" class="text-center py-4 text-muted">No products found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

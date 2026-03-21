@@ -1,0 +1,37 @@
+{% extends 'shop/base.html' %}
+{% block title %}My Wishlist — LogiCart{% endblock %}
+{% block content %}
+<div class="lc-wishlist">
+  <h2>My Wishlist ({{ items.count }})</h2>
+  {% if items %}
+  <div class="lc-products-grid">
+    {% for item in items %}
+    <div class="lc-product-card">
+      <div class="lc-product-img">
+        {% if item.product.image %}<img src="{{ item.product.image.url }}" alt="{{ item.product.product_name }}">{% else %}<span style="font-size:4rem">🛍️</span>{% endif %}
+        <button class="lc-wish-btn wished" onclick="lcToggleWish(this, {{ item.product.id }}, '{{ item.product.product_name|escapejs }}')"><i class="fas fa-heart"></i></button>
+      </div>
+      <div class="lc-product-body">
+        <div class="lc-product-cat">{{ item.product.category }}</div>
+        <div class="lc-product-name">{{ item.product.product_name }}</div>
+        <div class="lc-product-price">
+          <span class="price-now">₹{{ item.product.price|floatformat:0 }}</span>
+          {% if item.product.discount_percent %}<span class="price-off">{{ item.product.discount_percent }}% off</span>{% endif %}
+        </div>
+      </div>
+      <div class="lc-product-footer">
+        <button class="btn-sm btn-add-cart" onclick="LC.addItem({{ item.product.id }}, '{{ item.product.product_name|escapejs }}', {{ item.product.price }}, '🛍️')">Add to Cart</button>
+        <a href="{% url 'ProductView' item.product.id %}" class="btn-sm btn-quick-view">View</a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div style="text-align:center;padding:80px 24px;color:var(--muted)">
+    <i class="fas fa-heart" style="font-size:3rem;opacity:.3;display:block;margin-bottom:16px"></i>
+    <h3 style="margin-bottom:8px">Your wishlist is empty</h3>
+    <a href="{% url 'ShopHome' %}" class="lc-btn lc-btn-accent" style="margin-top:16px">Start Shopping</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

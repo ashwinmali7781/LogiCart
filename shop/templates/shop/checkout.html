@@ -1,0 +1,112 @@
+{% extends 'shop/base.html' %}
+{% load static %}
+{% block title %}Checkout — LogiCart{% endblock %}
+{% block newsletter %}{% endblock %}
+
+{% block content %}
+<div style="padding:24px 32px 0">
+  <h1 style="font-size:1.6rem;font-weight:700;letter-spacing:-.5px;margin-bottom:4px">Checkout</h1>
+  <p style="font-size:.88rem;color:var(--muted)">Complete your order securely</p>
+</div>
+
+<div class="lc-checkout">
+  <!-- Shipping Form -->
+  <div>
+    <div class="lc-checkout-section">
+      <h3>Shipping Information</h3>
+      <form id="checkoutForm" method="post" action="{% url 'CheckOut' %}">
+        {% csrf_token %}
+        <input type="hidden" name="itemsJson" id="checkoutItemsJson">
+        <input type="hidden" name="amount" id="checkoutAmount">
+        <input type="hidden" name="coupon_code" id="checkoutCoupon">
+
+        <div class="lc-form-row">
+          <div class="lc-form-group">
+            <label class="lc-form-label">Full Name *</label>
+            <input class="lc-form-input" name="name" required placeholder="Rahul Mehta">
+          </div>
+          <div class="lc-form-group">
+            <label class="lc-form-label">Phone *</label>
+            <input class="lc-form-input" name="phone" required placeholder="+91 98765 43210">
+          </div>
+        </div>
+        <div class="lc-form-group">
+          <label class="lc-form-label">Email Address *</label>
+          <input class="lc-form-input" name="email" type="email" required placeholder="you@email.com">
+        </div>
+        <div class="lc-form-group">
+          <label class="lc-form-label">Address Line 1 *</label>
+          <input class="lc-form-input" name="address1" required placeholder="House/Flat no, Street name">
+        </div>
+        <div class="lc-form-group">
+          <label class="lc-form-label">Address Line 2</label>
+          <input class="lc-form-input" name="address2" placeholder="Landmark, Area (optional)">
+        </div>
+        <div class="lc-form-row">
+          <div class="lc-form-group">
+            <label class="lc-form-label">City *</label>
+            <input class="lc-form-input" name="city" required placeholder="Pune">
+          </div>
+          <div class="lc-form-group">
+            <label class="lc-form-label">State *</label>
+            <input class="lc-form-input" name="state" required placeholder="Maharashtra">
+          </div>
+        </div>
+        <div class="lc-form-group">
+          <label class="lc-form-label">PIN Code *</label>
+          <input class="lc-form-input" name="zip_code" required placeholder="411045" maxlength="6" style="max-width:160px">
+        </div>
+        <button type="submit" class="lc-btn lc-btn-accent" style="width:100%;justify-content:center;padding:13px">
+          <i class="fas fa-lock" style="font-size:.75rem"></i> Place Order
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Order Summary -->
+  <div>
+    <div class="lc-checkout-section">
+      <h3>Order Summary</h3>
+      <div id="cartSummaryItems"></div>
+      <div style="margin-top:16px">
+        <div style="display:flex;gap:8px;margin-bottom:10px">
+          <input class="lc-form-input" id="couponCode" placeholder="Coupon code" style="flex:1">
+          <button class="lc-btn lc-btn-accent" style="padding:9px 16px;font-size:.82rem" onclick="lcApplyCoupon()">Apply</button>
+        </div>
+        <div id="couponDiscount" style="text-align:right;font-size:.82rem;color:var(--green);font-weight:600;min-height:18px;margin-bottom:6px"></div>
+      </div>
+      <div style="border-top:1px solid var(--border);padding-top:14px;margin-top:8px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:.88rem;color:var(--muted)">
+          <span>Subtotal</span><span id="checkoutDisplayTotal">—</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:.88rem;color:var(--green)">
+          <span>Delivery</span><span>FREE</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-weight:700;font-size:1.05rem;padding-top:10px;border-top:1px solid var(--border)">
+          <span>Total</span><span id="checkoutFinalTotal">—</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="background:var(--green-light);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:10px;margin-top:12px">
+      <i class="fas fa-shield-alt" style="color:var(--green);font-size:1.1rem"></i>
+      <div>
+        <div style="font-size:.83rem;font-weight:600;color:var(--green)">Secure Checkout</div>
+        <div style="font-size:.78rem;color:var(--green)">Your data is 100% encrypted and safe.</div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  LC.initCheckout();
+  // Sync final total
+  const ft = document.getElementById('checkoutFinalTotal');
+  const dt = document.getElementById('checkoutDisplayTotal');
+  if (ft && dt) ft.textContent = dt.textContent;
+});
+</script>
+{% endblock %}

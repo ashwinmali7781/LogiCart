@@ -1,0 +1,190 @@
+{% extends 'shop/base.html' %}
+{% load static %}
+{% block title %}LogiCart — Shop Premium Products Online{% endblock %}
+{% block nav_shop %}active{% endblock %}
+
+{% block content %}
+
+<!-- ── Hero ── -->
+<section class="lc-hero">
+  <div class="lc-hero-text">
+    <div class="lc-hero-tag"><i class="fas fa-bolt"></i> New Season Drop 2025</div>
+    <h1>Shop Smarter,<br>Live <em>Better</em></h1>
+    <p>Discover premium products across electronics, fashion, beauty, home, sports and more — curated for the modern Indian shopper.</p>
+    <div class="lc-hero-btns">
+      <a href="{% url 'Search' %}" class="lc-btn lc-btn-accent"><i class="fas fa-arrow-right"></i> Browse All Products</a>
+      <a href="{% url 'Search' %}?sort=price_asc" class="lc-btn" style="background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.12)">View Deals</a>
+    </div>
+  </div>
+  <div class="lc-hero-stats">
+    <div class="lc-stat-card">
+      <div class="lc-stat-icon"><i class="fas fa-box"></i></div>
+      <div><h3>2,400+</h3><p>Products in stock</p></div>
+    </div>
+    <div class="lc-stat-card">
+      <div class="lc-stat-icon"><i class="fas fa-star"></i></div>
+      <div><h3>4.8 ★</h3><p>Avg customer rating</p></div>
+    </div>
+    <div class="lc-stat-card">
+      <div class="lc-stat-icon"><i class="fas fa-truck"></i></div>
+      <div><h3>Free Ship</h3><p>On orders above ₹499</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Features ── -->
+<div class="lc-features">
+  <div class="lc-feature">
+    <div class="lc-feature-icon"><i class="fas fa-shipping-fast"></i></div>
+    <div><h4>Free Delivery</h4><p>On orders over ₹499</p></div>
+  </div>
+  <div class="lc-feature">
+    <div class="lc-feature-icon"><i class="fas fa-undo-alt"></i></div>
+    <div><h4>Easy Returns</h4><p>30-day hassle-free returns</p></div>
+  </div>
+  <div class="lc-feature">
+    <div class="lc-feature-icon"><i class="fas fa-shield-alt"></i></div>
+    <div><h4>Secure Payments</h4><p>100% safe & encrypted</p></div>
+  </div>
+  <div class="lc-feature">
+    <div class="lc-feature-icon"><i class="fas fa-headset"></i></div>
+    <div><h4>24/7 Support</h4><p>Always here to help</p></div>
+  </div>
+</div>
+
+<!-- ── Featured Products ── -->
+{% if featured %}
+<section class="lc-section">
+  <div class="lc-section-header">
+    <div>
+      <div class="lc-section-tag">Hand-Picked</div>
+      <h2>Featured Products</h2>
+    </div>
+    <a href="{% url 'Search' %}">View All →</a>
+  </div>
+  <div class="lc-products-grid">
+    {% for product in featured %}
+    <div class="lc-product-card">
+      <div class="lc-product-img">
+        {% if product.image %}
+          <img src="{{ product.image.url }}" alt="{{ product.product_name }}">
+        {% else %}
+          <span style="font-size:4rem">🛍️</span>
+        {% endif %}
+        <span class="lc-product-badge badge-featured">FEATURED</span>
+        {% if product.discount_percent %}
+          <span class="lc-product-badge" style="top:10px;left:auto;right:10px;background:var(--accent)">{{ product.discount_percent }}% OFF</span>
+        {% endif %}
+        <button class="lc-wish-btn" onclick="lcToggleWish(this, {{ product.id }}, '{{ product.product_name|escapejs }}')" title="Wishlist">
+          <i class="far fa-heart"></i>
+        </button>
+      </div>
+      <div class="lc-product-body">
+        <div class="lc-product-cat">{{ product.category }}{% if product.subcategory %} · {{ product.subcategory }}{% endif %}</div>
+        <div class="lc-product-name">{{ product.product_name }}</div>
+        <div class="lc-product-stars">
+          <span class="stars">
+            {% with rating=product.avg_rating %}
+              {% for i in "12345" %}{% if forloop.counter <= rating %}★{% else %}☆{% endif %}{% endfor %}
+            {% endwith %}
+          </span>
+          <span class="count">{{ product.avg_rating }} ({{ product.reviews.count }})</span>
+        </div>
+        <div class="lc-product-price">
+          <span class="price-now">₹{{ product.price|floatformat:0 }}</span>
+          {% if product.original_price and product.original_price > product.price %}
+            <span class="price-was">₹{{ product.original_price|floatformat:0 }}</span>
+            <span class="price-off">{{ product.discount_percent }}% off</span>
+          {% endif %}
+        </div>
+      </div>
+      <div class="lc-product-footer">
+        <button class="btn-sm btn-add-cart" onclick="LC.addItem({{ product.id }}, '{{ product.product_name|escapejs }}', {{ product.price }}, '🛍️')">
+          <i class="fas fa-cart-plus"></i> Add to Cart
+        </button>
+        <a href="{% url 'ProductView' product.id %}" class="btn-sm btn-quick-view">View</a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<!-- ── All Products by Category ── -->
+{% for cat_group in allProds %}
+{% with products=cat_group.0 %}
+{% if products %}
+<section class="lc-section" style="padding-top:0">
+  <div class="lc-section-header">
+    <div>
+      <div class="lc-section-tag">Category</div>
+      <h2>{{ products.0.category }}</h2>
+    </div>
+    <a href="{% url 'Search' %}?cat={{ products.0.category }}">View All →</a>
+  </div>
+  <div class="lc-products-grid">
+    {% for product in products %}
+    <div class="lc-product-card">
+      <div class="lc-product-img">
+        {% if product.image %}
+          <img src="{{ product.image.url }}" alt="{{ product.product_name }}">
+        {% else %}
+          <span style="font-size:4rem">🛍️</span>
+        {% endif %}
+        {% if not product.in_stock %}
+          <span class="lc-product-badge" style="background:#6b7280">OUT OF STOCK</span>
+        {% elif product.discount_percent %}
+          <span class="lc-product-badge">{{ product.discount_percent }}% OFF</span>
+        {% endif %}
+        <button class="lc-wish-btn" onclick="lcToggleWish(this, {{ product.id }}, '{{ product.product_name|escapejs }}')" title="Wishlist">
+          <i class="far fa-heart"></i>
+        </button>
+      </div>
+      <div class="lc-product-body">
+        <div class="lc-product-cat">{{ product.category }}{% if product.subcategory %} · {{ product.subcategory }}{% endif %}</div>
+        <div class="lc-product-name">{{ product.product_name }}</div>
+        <div class="lc-product-stars">
+          <span class="stars">
+            {% with rating=product.avg_rating %}
+              {% for i in "12345" %}{% if forloop.counter <= rating %}★{% else %}☆{% endif %}{% endfor %}
+            {% endwith %}
+          </span>
+          <span class="count">{{ product.avg_rating }} ({{ product.reviews.count }})</span>
+        </div>
+        <div class="lc-product-price">
+          <span class="price-now">₹{{ product.price|floatformat:0 }}</span>
+          {% if product.original_price and product.original_price > product.price %}
+            <span class="price-was">₹{{ product.original_price|floatformat:0 }}</span>
+            <span class="price-off">{{ product.discount_percent }}% off</span>
+          {% endif %}
+        </div>
+      </div>
+      <div class="lc-product-footer">
+        {% if product.in_stock %}
+          <button class="btn-sm btn-add-cart" onclick="LC.addItem({{ product.id }}, '{{ product.product_name|escapejs }}', {{ product.price }}, '🛍️')">
+            <i class="fas fa-cart-plus"></i> Add to Cart
+          </button>
+        {% else %}
+          <button class="btn-sm btn-add-cart" disabled style="opacity:.5;cursor:not-allowed">Out of Stock</button>
+        {% endif %}
+        <a href="{% url 'ProductView' product.id %}" class="btn-sm btn-quick-view">View</a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+{% endwith %}
+{% endfor %}
+
+<!-- ── Promo Banner ── -->
+<div class="lc-banner">
+  <div class="lc-banner-text">
+    <h2>Flat 30% Off on Electronics</h2>
+    <p>Limited-time offer on top brands. Use code <span class="lc-banner-code">LOGI30</span> at checkout.</p>
+    <a href="{% url 'Search' %}?cat=Electronics" class="lc-btn lc-btn-accent">Shop Electronics</a>
+  </div>
+  <div class="lc-banner-emoji">⚡</div>
+</div>
+
+{% endblock %}

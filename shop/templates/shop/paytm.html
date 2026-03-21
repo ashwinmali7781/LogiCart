@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html>
+<head><title>Redirecting to Payment…</title></head>
+<body onload="document.getElementById('paytmForm').submit()">
+  <p style="text-align:center;padding:48px;font-family:sans-serif">Redirecting to payment gateway…</p>
+  <form id="paytmForm" action="https://securegw-stage.paytm.in/order/process" method="post">
+    {% for key, value in param_dict.items %}
+    <input type="hidden" name="{{ key }}" value="{{ value }}">
+    {% endfor %}
+  </form>
+</body>
+</html>

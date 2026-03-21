@@ -1,0 +1,180 @@
+{% extends 'shop/base.html' %}
+{% load static %}
+{% block title %}{{ product.product_name }} — LogiCart{% endblock %}
+{% block meta_desc %}{{ product.desc|truncatechars:160 }}{% endblock %}
+
+{% block content %}
+<div style="padding:20px 32px 0;font-size:.85rem;color:var(--muted)">
+  <a href="{% url 'ShopHome' %}" style="color:var(--accent)">Home</a> /
+  <a href="{% url 'Search' %}?cat={{ product.category }}" style="color:var(--accent)">{{ product.category }}</a> /
+  {{ product.product_name }}
+</div>
+
+<div class="lc-prodview">
+  <!-- Image -->
+  <div>
+    <div class="lc-prodview-img">
+      {% if product.image %}
+        <img src="{{ product.image.url }}" alt="{{ product.product_name }}" style="width:100%;height:100%;object-fit:contain;padding:24px">
+      {% else %}
+        <span>🛍️</span>
+      {% endif %}
+    </div>
+    {% if product.discount_percent %}
+    <div style="margin-top:12px;background:var(--accent);color:#fff;border-radius:10px;padding:12px 18px;display:flex;align-items:center;justify-content:space-between">
+      <span style="font-weight:600">You save ₹{{ product.original_price|add:"-"|add:product.price }} ({{ product.discount_percent }}%)</span>
+      <span class="lc-product-badge" style="position:static;background:rgba(255,255,255,.2)">DEAL</span>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Info -->
+  <div class="lc-prodview-info">
+    <div class="lc-prodview-cat">{{ product.category }}{% if product.subcategory %} · {{ product.subcategory }}{% endif %}</div>
+    <h1 class="lc-prodview-name">{{ product.product_name }}</h1>
+
+    <div class="lc-product-stars" style="font-size:.9rem;gap:6px">
+      <span class="stars" style="font-size:.9rem">
+        {% with rating=product.avg_rating %}
+          {% for i in "12345" %}{% if forloop.counter <= rating %}★{% else %}☆{% endif %}{% endfor %}
+        {% endwith %}
+      </span>
+      <span>{{ product.avg_rating }}/5</span>
+      <span style="color:var(--muted)">({{ product.reviews.count }} reviews)</span>
+    </div>
+
+    <div class="lc-prodview-price">
+      <span class="price-now">₹{{ product.price|floatformat:0 }}</span>
+      {% if product.original_price and product.original_price > product.price %}
+        <span class="price-was">₹{{ product.original_price|floatformat:0 }}</span>
+        <span class="price-off">{{ product.discount_percent }}% off</span>
+      {% endif %}
+    </div>
+
+    <p class="lc-prodview-desc">{{ product.desc }}</p>
+
+    <div style="display:flex;align-items:center;gap:10px;margin:4px 0">
+      <span style="font-size:.85rem;font-weight:600">Availability:</span>
+      {% if product.in_stock %}
+        <span style="color:var(--green);font-weight:600;font-size:.85rem"><i class="fas fa-check-circle"></i> In Stock ({{ product.stock }} left)</span>
+      {% else %}
+        <span style="color:var(--red);font-weight:600;font-size:.85rem"><i class="fas fa-times-circle"></i> Out of Stock</span>
+      {% endif %}
+    </div>
+
+    <div style="display:flex;gap:12px;margin-top:8px;flex-wrap:wrap">
+      {% if product.in_stock %}
+        <button class="lc-btn lc-btn-accent" style="flex:1;justify-content:center" onclick="LC.addItem({{ product.id }}, '{{ product.product_name|escapejs }}', {{ product.price }}, '🛍️');lcOpenCart()">
+          <i class="fas fa-shopping-bag"></i> Add to Cart
+        </button>
+      {% else %}
+        <button class="lc-btn" style="flex:1;justify-content:center;opacity:.5;cursor:not-allowed;background:var(--muted);color:#fff" disabled>Out of Stock</button>
+      {% endif %}
+      <button class="lc-icon-btn" onclick="lcToggleWish(this, {{ product.id }}, '{{ product.product_name|escapejs }}')" style="width:auto;padding:0 14px;gap:6px;font-size:.88rem">
+        <i class="far fa-heart"></i> Wishlist
+      </button>
+    </div>
+
+    <!-- Quick Info -->
+    <div style="background:var(--bg);border-radius:12px;padding:16px;display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div style="display:flex;align-items:center;gap:8px;font-size:.83rem"><i class="fas fa-shipping-fast" style="color:var(--accent)"></i> Free delivery above ₹499</div>
+      <div style="display:flex;align-items:center;gap:8px;font-size:.83rem"><i class="fas fa-undo" style="color:var(--accent)"></i> 30-day returns</div>
+      <div style="display:flex;align-items:center;gap:8px;font-size:.83rem"><i class="fas fa-shield-alt" style="color:var(--accent)"></i> Genuine product</div>
+      <div style="display:flex;align-items:center;gap:8px;font-size:.83rem"><i class="fas fa-headset" style="color:var(--accent)"></i> 24/7 support</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Reviews ── -->
+<div style="padding:0 32px 40px">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:32px">
+
+    <!-- Existing Reviews -->
+    <div>
+      <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:16px">Customer Reviews ({{ reviews.count }})</h3>
+      {% if reviews %}
+        {% for review in reviews %}
+        <div style="background:var(--white);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+            <span style="font-weight:600;font-size:.88rem">{{ review.name }}</span>
+            <span style="color:#f59e0b;font-size:.85rem">{% for i in "12345" %}{% if forloop.counter <= review.rating %}★{% else %}☆{% endif %}{% endfor %}</span>
+          </div>
+          <p style="font-size:.85rem;color:var(--muted)">{{ review.comment }}</p>
+          <div style="font-size:.75rem;color:var(--muted);margin-top:8px">{{ review.created_at|date:"d M Y" }}</div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <p style="color:var(--muted);font-size:.88rem">No reviews yet. Be the first to review!</p>
+      {% endif %}
+    </div>
+
+    <!-- Write a Review -->
+    <div>
+      <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:16px">Write a Review</h3>
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="review">
+        <div class="lc-form-group">
+          <label class="lc-form-label">Your Name</label>
+          <input class="lc-form-input" name="r_name" required placeholder="John Doe">
+        </div>
+        <div class="lc-form-group">
+          <label class="lc-form-label">Email</label>
+          <input class="lc-form-input" name="r_email" type="email" required placeholder="you@email.com">
+        </div>
+        <div class="lc-form-group">
+          <label class="lc-form-label">Rating</label>
+          <select class="lc-form-input" name="r_rating" required>
+            <option value="">Select rating</option>
+            <option value="5">★★★★★ Excellent</option>
+            <option value="4">★★★★☆ Good</option>
+            <option value="3">★★★☆☆ Average</option>
+            <option value="2">★★☆☆☆ Poor</option>
+            <option value="1">★☆☆☆☆ Terrible</option>
+          </select>
+        </div>
+        <div class="lc-form-group">
+          <label class="lc-form-label">Comment</label>
+          <textarea class="lc-form-input" name="r_comment" required placeholder="Share your experience…" rows="4"></textarea>
+        </div>
+        <button type="submit" class="lc-btn lc-btn-accent">Submit Review</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ── Related Products ── -->
+{% if related %}
+<section class="lc-section" style="padding-top:0">
+  <div class="lc-section-header">
+    <h2>Related Products</h2>
+    <a href="{% url 'Search' %}?cat={{ product.category }}">View All →</a>
+  </div>
+  <div class="lc-products-grid">
+    {% for p in related %}
+    <div class="lc-product-card">
+      <div class="lc-product-img">
+        {% if p.image %}<img src="{{ p.image.url }}" alt="{{ p.product_name }}">{% else %}<span style="font-size:4rem">🛍️</span>{% endif %}
+        {% if p.discount_percent %}<span class="lc-product-badge">{{ p.discount_percent }}% OFF</span>{% endif %}
+      </div>
+      <div class="lc-product-body">
+        <div class="lc-product-cat">{{ p.category }}</div>
+        <div class="lc-product-name">{{ p.product_name }}</div>
+        <div class="lc-product-price">
+          <span class="price-now">₹{{ p.price|floatformat:0 }}</span>
+          {% if p.original_price and p.original_price > p.price %}
+            <span class="price-was">₹{{ p.original_price|floatformat:0 }}</span>
+          {% endif %}
+        </div>
+      </div>
+      <div class="lc-product-footer">
+        <button class="btn-sm btn-add-cart" onclick="LC.addItem({{ p.id }}, '{{ p.product_name|escapejs }}', {{ p.price }}, '🛍️')">Add to Cart</button>
+        <a href="{% url 'ProductView' p.id %}" class="btn-sm btn-quick-view">View</a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{% endblock %}

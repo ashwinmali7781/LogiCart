@@ -1,0 +1,185 @@
+{% extends 'dashboard/base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard Overview{% endblock %}
+{% block nav_home %}active{% endblock %}
+
+{% block extra_css %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<!-- Stat Cards -->
+<div class="row mb-4">
+  <div class="col-xl-3 col-md-6 mb-3">
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#e8f0fe"><span style="color:#4f8ef7">🛍️</span></div>
+      <div>
+        <div class="stat-label">Total Orders</div>
+        <div class="stat-value">{{ total_orders }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-xl-3 col-md-6 mb-3">
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#e6f4ea"><span style="color:#28a745">💰</span></div>
+      <div>
+        <div class="stat-label">Total Revenue</div>
+        <div class="stat-value">Rs. {{ total_revenue|floatformat:0 }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-xl-3 col-md-6 mb-3">
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#fef3cd"><span style="color:#e65100">📦</span></div>
+      <div>
+        <div class="stat-label">Active Products</div>
+        <div class="stat-value">{{ total_products }}</div>
+        {% if low_stock %}<div class="stat-sub text-danger">⚠️ {{ low_stock }} low stock</div>{% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="col-xl-3 col-md-6 mb-3">
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#fce8e6"><span style="color:#dc3545">👥</span></div>
+      <div>
+        <div class="stat-label">Unique Customers</div>
+        <div class="stat-value">{{ total_customers }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Quick actions -->
+<div class="row mb-4">
+  <div class="col">
+    <div class="d-flex gap-2 flex-wrap" style="gap:10px">
+      <a href="{% url 'dashboard_product_add' %}" class="btn btn-primary btn-sm"><i class="fas fa-plus mr-1"></i>Add Product</a>
+      <a href="{% url 'dashboard_orders' %}?status=placed" class="btn btn-warning btn-sm"><i class="fas fa-clock mr-1"></i>New Orders</a>
+      <a href="{% url 'dashboard_reviews' %}?filter=pending" class="btn btn-info btn-sm text-white"><i class="fas fa-star mr-1"></i>Pending Reviews {% if pending_reviews %}<span class="badge badge-light ml-1">{{ pending_reviews }}</span>{% endif %}</a>
+      <a href="{% url 'dashboard_messages' %}" class="btn btn-secondary btn-sm"><i class="fas fa-envelope mr-1"></i>Messages {% if unread_messages %}<span class="badge badge-light ml-1">{{ unread_messages }}</span>{% endif %}</a>
+      <a href="{% url 'dashboard_returns' %}" class="btn btn-danger btn-sm"><i class="fas fa-undo mr-1"></i>Returns {% if pending_returns %}<span class="badge badge-light ml-1">{{ pending_returns }}</span>{% endif %}</a>
+      <a href="{% url 'dashboard_coupon_add' %}" class="btn btn-success btn-sm"><i class="fas fa-tag mr-1"></i>New Coupon</a>
+      <a href="{% url 'dashboard_orders_export' %}" class="btn btn-outline-secondary btn-sm"><i class="fas fa-download mr-1"></i>Export Orders</a>
+    </div>
+  </div>
+</div>
+
+<!-- Charts row -->
+<div class="row mb-4">
+  <div class="col-md-8 mb-3">
+    <div class="dash-card">
+      <div class="card-header">Orders – Last 30 Days</div>
+      <div class="card-body"><canvas id="ordersChart" height="100"></canvas></div>
+    </div>
+  </div>
+  <div class="col-md-4 mb-3">
+    <div class="dash-card">
+      <div class="card-header">Orders by Status</div>
+      <div class="card-body"><canvas id="statusChart" height="200"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<div class="row mb-4">
+  <div class="col-md-6 mb-3">
+    <div class="dash-card">
+      <div class="card-header">Revenue – Last 7 Days (Rs.)</div>
+      <div class="card-body"><canvas id="revenueChart" height="130"></canvas></div>
+    </div>
+  </div>
+  <div class="col-md-6 mb-3">
+    <div class="dash-card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        Top Products (by Wishlist)
+      </div>
+      <div class="card-body p-0">
+        <table class="table dash-table mb-0">
+          <thead><tr><th>Product</th><th>Category</th><th>Price</th><th>Stock</th><th>❤️</th></tr></thead>
+          <tbody>
+            {% for p in top_products %}
+            <tr>
+              <td><a href="{% url 'dashboard_product_edit' p.pk %}">{{ p.product_name|truncatechars:28 }}</a></td>
+              <td>{{ p.category }}</td>
+              <td>Rs. {{ p.price }}</td>
+              <td>{% if p.stock <= 5 %}<span class="text-danger font-weight-bold">{{ p.stock }}</span>{% else %}{{ p.stock }}{% endif %}</td>
+              <td>{{ p.wishlist_count }}</td>
+            </tr>
+            {% empty %}<tr><td colspan="5" class="text-muted text-center py-3">No products yet</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Recent Orders -->
+<div class="dash-card">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    Recent Orders
+    <a href="{% url 'dashboard_orders' %}" class="btn btn-outline-primary btn-sm">View All</a>
+  </div>
+  <div class="card-body p-0">
+    <table class="table dash-table mb-0">
+      <thead>
+        <tr><th>#</th><th>Customer</th><th>Amount</th><th>Status</th><th>Date</th><th></th></tr>
+      </thead>
+      <tbody>
+        {% for order in recent_orders %}
+        <tr>
+          <td><strong>#{{ order.order_id }}</strong></td>
+          <td>{{ order.name }}<br><small class="text-muted">{{ order.email }}</small></td>
+          <td>Rs. {{ order.amount }}</td>
+          <td><span class="status-badge status-{{ order.status }}">{{ order.get_status_display }}</span></td>
+          <td><small>{{ order.created_at|date:"d M Y, H:i" }}</small></td>
+          <td><a href="{% url 'dashboard_order_detail' order.pk %}" class="btn btn-sm btn-outline-secondary">View</a></td>
+        </tr>
+        {% empty %}<tr><td colspan="6" class="text-muted text-center py-3">No orders yet</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+var ordersCtx = document.getElementById('ordersChart').getContext('2d');
+new Chart(ordersCtx, {
+  type: 'line',
+  data: {
+    labels: {{ orders_chart_labels|safe }},
+    datasets: [{
+      label: 'Orders', data: {{ orders_chart_data|safe }},
+      borderColor: '#4f8ef7', backgroundColor: 'rgba(79,142,247,.08)',
+      borderWidth: 2, pointRadius: 3, fill: true, tension: 0.4
+    }]
+  },
+  options: { legend: { display: false }, scales: { yAxes: [{ ticks: { beginAtZero: true, precision: 0 } }] } }
+});
+
+var statusCtx = document.getElementById('statusChart').getContext('2d');
+new Chart(statusCtx, {
+  type: 'doughnut',
+  data: {
+    labels: {{ status_labels|safe }},
+    datasets: [{ data: {{ status_data|safe }},
+      backgroundColor: ['#4f8ef7','#ffc107','#17a2b8','#6f42c1','#28a745','#dc3545','#adb5bd'] }]
+  },
+  options: { legend: { position: 'bottom', labels: { fontSize: 11 } }, cutoutPercentage: 60 }
+});
+
+var revCtx = document.getElementById('revenueChart').getContext('2d');
+new Chart(revCtx, {
+  type: 'bar',
+  data: {
+    labels: {{ revenue_chart_labels|safe }},
+    datasets: [{
+      label: 'Revenue (Rs.)', data: {{ revenue_chart_data|safe }},
+      backgroundColor: 'rgba(40,167,69,.7)', borderRadius: 6
+    }]
+  },
+  options: { legend: { display: false }, scales: { yAxes: [{ ticks: { beginAtZero: true } }] } }
+});
+</script>
+{% endblock %}

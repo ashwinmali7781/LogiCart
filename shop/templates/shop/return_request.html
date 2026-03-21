@@ -1,0 +1,34 @@
+{% extends 'shop/base.html' %}
+{% block title %}Return Request — LogiCart{% endblock %}
+{% block content %}
+<div style="max-width:600px;margin:0 auto;padding:48px 24px">
+  <h1 style="font-size:1.8rem;font-weight:800;letter-spacing:-1px;margin-bottom:8px">Request a Return</h1>
+  <p style="color:var(--muted);margin-bottom:28px">Fill in your order details below to initiate a return. Returns are accepted within 30 days of delivery.</p>
+
+  {% if existing_request %}
+  <div class="lc-alert lc-alert-info">
+    <i class="fas fa-info-circle"></i>
+    A return request already exists for this order — Status: <strong>{{ existing_request.get_status_display }}</strong>
+  </div>
+  {% else %}
+  <div style="background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:28px">
+    <form method="post">
+      {% csrf_token %}
+      <div class="lc-form-group"><label class="lc-form-label">Order ID *</label><input class="lc-form-input" name="order_id" required placeholder="e.g. 1042"></div>
+      <div class="lc-form-group"><label class="lc-form-label">Email Address *</label><input class="lc-form-input" name="email" type="email" required placeholder="The email used for the order"></div>
+      <div class="lc-form-group">
+        <label class="lc-form-label">Reason *</label>
+        <select class="lc-form-input" name="reason" required>
+          <option value="">Select a reason</option>
+          {% for value, label in reason_choices %}
+          <option value="{{ value }}">{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="lc-form-group"><label class="lc-form-label">Description *</label><textarea class="lc-form-input" name="description" required placeholder="Please describe the issue in detail…" rows="4"></textarea></div>
+      <button type="submit" class="lc-btn lc-btn-accent" style="width:100%;justify-content:center">Submit Return Request</button>
+    </form>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

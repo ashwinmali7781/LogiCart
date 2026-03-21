@@ -1,0 +1,39 @@
+{% extends 'shop/base.html' %}
+{% block title %}Compare Products — LogiCart{% endblock %}
+{% block content %}
+<div class="lc-compare">
+  <h2 style="font-size:1.5rem;font-weight:700;margin-bottom:20px">Compare Products</h2>
+  {% if products %}
+  <table>
+    <thead>
+      <tr>
+        <th>Feature</th>
+        {% for p in products %}<th>{{ p.product_name }}</th>{% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Image</strong></td>
+        {% for p in products %}<td>{% if p.image %}<img src="{{ p.image.url }}" style="width:80px;height:80px;object-fit:cover;border-radius:8px">{% else %}<span style="font-size:2rem">🛍️</span>{% endif %}</td>{% endfor %}
+      </tr>
+      <tr><td><strong>Category</strong></td>{% for p in products %}<td>{{ p.category }}</td>{% endfor %}</tr>
+      <tr><td><strong>Price</strong></td>{% for p in products %}<td><strong>₹{{ p.price|floatformat:0 }}</strong>{% if p.original_price and p.original_price > p.price %} <small style="color:var(--muted);text-decoration:line-through">₹{{ p.original_price|floatformat:0 }}</small>{% endif %}</td>{% endfor %}</tr>
+      <tr><td><strong>Discount</strong></td>{% for p in products %}<td>{% if p.discount_percent %}<span class="price-off">{{ p.discount_percent }}% off</span>{% else %}—{% endif %}</td>{% endfor %}</tr>
+      <tr><td><strong>Rating</strong></td>{% for p in products %}<td>{{ p.avg_rating }} ★ ({{ p.reviews.count }})</td>{% endfor %}</tr>
+      <tr><td><strong>Stock</strong></td>{% for p in products %}<td>{% if p.in_stock %}<span style="color:var(--green)">In Stock ({{ p.stock }})</span>{% else %}<span style="color:var(--red)">Out of Stock</span>{% endif %}</td>{% endfor %}</tr>
+      <tr>
+        <td></td>
+        {% for p in products %}
+        <td>
+          <button class="lc-btn lc-btn-accent" style="font-size:.8rem;padding:8px 14px" onclick="LC.addItem({{ p.id }}, '{{ p.product_name|escapejs }}', {{ p.price }}, '🛍️')">Add to Cart</button>
+        </td>
+        {% endfor %}
+      </tr>
+    </tbody>
+  </table>
+  {% else %}
+  <p style="color:var(--muted)">Select products to compare from the shop.</p>
+  {% endif %}
+  <div style="margin-top:20px"><a href="{% url 'ShopHome' %}" class="lc-btn lc-btn-outline">← Back to Shop</a></div>
+</div>
+{% endblock %}

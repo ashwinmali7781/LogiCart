@@ -1,0 +1,147 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}LogiCart — Premium E-Commerce{% endblock %}</title>
+  <meta name="description" content="{% block meta_desc %}LogiCart – Your one-stop destination for premium products at unbeatable prices.{% endblock %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="{% static 'shop/css/style.css' %}">
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<!-- ── Navbar ── -->
+<nav class="lc-nav">
+  <a href="{% url 'ShopHome' %}" class="lc-brand">Logi<span>Cart</span></a>
+
+  <div class="lc-nav-links">
+    <a href="{% url 'ShopHome' %}" class="{% block nav_shop %}{% endblock %}">Shop</a>
+    <a href="{% url 'Search' %}">New Arrivals</a>
+    <a href="{% url 'Search' %}?sort=price_asc">Deals</a>
+    <a href="{% url 'AboutUs' %}">About</a>
+    <a href="{% url 'ContactUs' %}">Contact</a>
+  </div>
+
+  <div class="lc-nav-right">
+    <form class="lc-search" action="{% url 'Search' %}" method="get">
+      <input type="text" name="search" placeholder="Search products…" value="{{ request.GET.search|default:'' }}">
+      <button type="submit"><i class="fas fa-search"></i></button>
+    </form>
+
+    <a href="{% url 'WishList' %}" class="lc-icon-btn" title="Wishlist">
+      <i class="fas fa-heart"></i>
+    </a>
+
+    <button class="lc-icon-btn" onclick="lcOpenCart()" title="Cart">
+      <i class="fas fa-shopping-bag"></i>
+      <span class="lc-badge" id="lcCartBadge" style="display:none">0</span>
+    </button>
+
+    <a href="/dashboard/" class="lc-btn lc-btn-outline" style="padding:7px 14px;font-size:.82rem">
+      <i class="fas fa-lock" style="font-size:.72rem"></i> Admin
+    </a>
+  </div>
+</nav>
+
+<!-- ── Django Messages ── -->
+{% if messages %}
+<div class="lc-messages">
+  {% for message in messages %}
+  <div class="lc-alert lc-alert-{{ message.tags|default:'info' }}">
+    <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}exclamation-circle{% else %}info-circle{% endif %}"></i>
+    {{ message }}
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% block content %}{% endblock %}
+
+<!-- ── Cart Drawer ── -->
+<div class="lc-cart-overlay" id="lcCartOverlay" onclick="lcCloseCart()"></div>
+<div class="lc-cart-drawer" id="lcCartDrawer">
+  <div class="lc-cart-head">
+    <h3>Shopping Cart <span id="lcCartCount" style="color:var(--muted);font-weight:400;font-size:.82rem"></span></h3>
+    <button class="lc-cart-close" onclick="lcCloseCart()"><i class="fas fa-times"></i></button>
+  </div>
+  <div class="lc-cart-items" id="lcCartItems">
+    <div class="lc-cart-empty"><i class="fas fa-shopping-bag"></i><p>Your cart is empty</p></div>
+  </div>
+  <div id="lcCartFoot" style="display:none">
+    <div style="padding:16px 24px;border-top:1px solid var(--border)">
+      <div style="display:flex;gap:8px;margin-bottom:14px">
+        <input class="lc-form-input" id="couponCode" placeholder="Coupon code (e.g. LOGI30)" style="flex:1">
+        <button class="lc-btn lc-btn-accent" style="padding:9px 16px;font-size:.82rem" onclick="lcApplyCoupon()">Apply</button>
+      </div>
+      <div id="couponDiscount" style="text-align:right;font-size:.82rem;color:var(--green);font-weight:600;min-height:18px;margin-bottom:10px"></div>
+      <div class="lc-cart-total"><span>Total</span><span id="lcCartTotal">₹0</span></div>
+      <a href="{% url 'CheckOut' %}" class="lc-btn lc-btn-accent" style="width:100%;justify-content:center;display:flex">
+        <i class="fas fa-lock" style="font-size:.75rem"></i> Proceed to Checkout
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- ── Newsletter Banner ── -->
+{% block newsletter %}
+<div style="background:linear-gradient(135deg,#0d0f14,#1c1f29);padding:36px 32px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap">
+  <div>
+    <h3 style="font-family:'Syne',sans-serif;color:#fff;font-weight:700;font-size:1.2rem;margin-bottom:4px">Get exclusive deals in your inbox</h3>
+    <p style="color:#9ca3af;font-size:.88rem">Join 50,000+ shoppers. No spam, ever.</p>
+  </div>
+  <form style="display:flex;gap:10px" onsubmit="lcSubscribe(event)">
+    <input class="lc-form-input" id="newsletterEmail" type="email" placeholder="Your email address" style="width:280px">
+    <button type="submit" class="lc-btn lc-btn-accent">Subscribe</button>
+  </form>
+</div>
+{% endblock %}
+
+<!-- ── Footer ── -->
+<footer class="lc-footer">
+  <div class="lc-footer-grid">
+    <div>
+      <div class="lc-footer-brand">Logi<span>Cart</span></div>
+      <p class="lc-footer-desc">Your one-stop destination for premium products at unbeatable prices. Quality guaranteed, delivered fast across India.</p>
+      <div class="lc-footer-social">
+        <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+        <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+        <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+        <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+      </div>
+    </div>
+    <div class="lc-footer-col">
+      <h5>Company</h5>
+      <a href="{% url 'AboutUs' %}">About Us</a>
+      <a href="#">Careers</a>
+      <a href="#">Press</a>
+      <a href="#">Blog</a>
+    </div>
+    <div class="lc-footer-col">
+      <h5>Support</h5>
+      <a href="#">Help Centre</a>
+      <a href="{% url 'TrackOrder' %}">Track Order</a>
+      <a href="{% url 'ReturnRequest' %}">Returns</a>
+      <a href="{% url 'ContactUs' %}">Contact Us</a>
+    </div>
+    <div class="lc-footer-col">
+      <h5>Policies</h5>
+      <a href="#">Privacy Policy</a>
+      <a href="#">Terms of Use</a>
+      <a href="#">Refund Policy</a>
+      <a href="#">Shipping Info</a>
+    </div>
+  </div>
+  <div class="lc-footer-bottom">© 2025 LogiCart. All rights reserved.</div>
+</footer>
+
+<!-- Toast container -->
+<div class="lc-toasts" id="lcToasts"></div>
+
+<script src="{% static 'shop/js/main.js' %}"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

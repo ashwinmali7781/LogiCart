@@ -1,0 +1,104 @@
+{% extends 'dashboard/base.html' %}
+{% block title %}Order #{{ order.order_id }}{% endblock %}
+{% block page_title %}Order #{{ order.order_id }}{% endblock %}
+{% block nav_orders %}active{% endblock %}
+
+{% block content %}
+<div class="row">
+  <!-- Left: Order Info -->
+  <div class="col-lg-8">
+    <!-- Items -->
+    <div class="dash-card mb-4">
+      <div class="card-header">Order Items</div>
+      <div class="card-body p-0">
+        <table class="table dash-table mb-0">
+          <thead><tr><th>Product</th><th>Qty</th><th>Unit Price</th><th>Subtotal</th></tr></thead>
+          <tbody>
+            {% for id, info in items.items %}
+            <tr>
+              <td>{{ info.1 }}</td>
+              <td>{{ info.0 }}</td>
+              <td>Rs. {{ info.2 }}</td>
+              <td>Rs. {% widthratio info.2 1 1 %}{{ info.0|add:0 }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4" class="text-muted text-center py-3">No item data available.</td></tr>
+            {% endfor %}
+          </tbody>
+          <tfoot>
+            {% if order.discount_amount %}
+            <tr><td colspan="3" class="text-right text-success">Coupon Discount</td><td class="text-success">- Rs. {{ order.discount_amount }}</td></tr>
+            {% endif %}
+            <tr><td colspan="3" class="text-right font-weight-bold">Total</td><td class="font-weight-bold">Rs. {{ order.amount }}</td></tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+
+    <!-- Timeline -->
+    <div class="dash-card mb-4">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        Order Timeline
+        <form method="post" class="form-inline">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="add_note">
+          <input type="text" name="note" class="form-control form-control-sm mr-2" placeholder="Add a note…" style="width:220px">
+          <button class="btn btn-sm btn-outline-primary">Add</button>
+        </form>
+      </div>
+      <div class="card-body">
+        <div style="border-left:2px solid #dee2e6;padding-left:20px">
+          {% for u in updates %}
+          <div class="mb-3 position-relative">
+            <div style="position:absolute;left:-26px;top:4px;width:10px;height:10px;border-radius:50%;background:#4f8ef7;border:2px solid #fff;box-shadow:0 0 0 2px #4f8ef7"></div>
+            <div class="font-weight-bold small">{{ u.update_desc }}</div>
+            <div class="text-muted" style="font-size:.75rem">{{ u.timestamp|date:"d M Y H:i" }}</div>
+          </div>
+          {% empty %}
+          <p class="text-muted mb-0">No updates yet.</p>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right: Customer + Status -->
+  <div class="col-lg-4">
+    <!-- Status Update -->
+    <div class="dash-card mb-4">
+      <div class="card-header">Update Status</div>
+      <div class="card-body">
+        <div class="mb-3">
+          Current: <span class="status-badge status-{{ order.status }}">{{ order.get_status_display }}</span>
+        </div>
+        <form method="post">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="update_status">
+          <select name="status" class="form-control mb-3">
+            {% for val, label in status_choices %}
+            <option value="{{ val }}" {% if val == order.status %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+          <button class="btn btn-primary btn-block">Update Status</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Customer Info -->
+    <div class="dash-card mb-4">
+      <div class="card-header">Customer</div>
+      <div class="card-body" style="font-size:.9rem">
+        <p class="mb-1"><strong>{{ order.name }}</strong></p>
+        <p class="mb-1 text-muted">{{ order.email }}</p>
+        <p class="mb-1 text-muted">{{ order.phone }}</p>
+        <hr>
+        <p class="mb-1"><strong>Delivery Address</strong></p>
+        <p class="text-muted mb-0">{{ order.address }}<br>{{ order.city }}, {{ order.state }} – {{ order.zip_code }}</p>
+        {% if order.coupon %}<hr><p class="mb-0">Coupon: <code>{{ order.coupon.code }}</code></p>{% endif %}
+      </div>
+    </div>
+
+    <a href="{% url 'dashboard_orders' %}" class="btn btn-outline-secondary btn-block">← Back to Orders</a>
+  </div>
+</div>
+{% endblock %}
