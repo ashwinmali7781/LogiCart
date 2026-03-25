@@ -65,6 +65,19 @@ LogiCart/
 ├── download_images.py     # Utility: download product images
 └── download_images.ps1    # PowerShell version of image downloader
 ```
+## 📸 Screenshots
+
+### 🏠 Hero / Landing Page
+![LogiCart Hero Page](screenshots/screenshot-hero.png)
+
+### 🛍️ Featured Products
+![Featured Products](screenshots/screenshot-products.png)
+
+### 📦 Product Detail Page
+![Product Detail](screenshots/screenshot-product-detail.png)
+
+### 🖥️ Admin Dashboard
+![Admin Dashboard](screenshots/screenshot-dashboard.png)
 
 ---
 
