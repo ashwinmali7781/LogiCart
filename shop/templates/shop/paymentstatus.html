@@ -9,7 +9,7 @@
     <p style="color:var(--muted);margin-bottom:24px">Your payment of <strong>₹{{ response.TXNAMOUNT }}</strong> was received. Order #{{ response.ORDERID }} is confirmed.</p>
   {% else %}
     <div class="lc-confirmed-icon" style="background:var(--red-light)"><i class="fas fa-times" style="color:var(--red);font-size:2rem"></i></div>
-    <h1 style="font-size:2rem;font-weight:800;letter-spacing:-1px;margin-bottom:12px">Payment Failed</h1>
+    <h1 style="font-size:2rem;font-weight:800;letter-spacing:-1px;margin-bottom:12px">Payment Failed!</h1>
     <p style="color:var(--muted);margin-bottom:24px">{{ response.RESPMSG|default:"Something went wrong. Please try again or contact support." }}</p>
   {% endif %}
   <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
